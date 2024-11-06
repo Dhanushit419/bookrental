@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "996058412513",
+    "project_id": "booky-d3bdd",
+    "storage_bucket": "booky-d3bdd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:996058412513:android:ac47a4d61aebcd2741cea0",
+        "android_client_info": {
+          "package_name": "com.yuvaraj787.bookrental"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNxZs7sxNuAPFWDSGdJEdSG-cNZy_6nYk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

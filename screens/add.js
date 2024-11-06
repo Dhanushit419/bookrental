@@ -1,13 +1,30 @@
 import React, { useState } from 'react';
+// import firestore from '@react-native-firebase/firestore';
 import { View, Text, TextInput, Image, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { firestore } from '../firebaseConfig';  // Make sure the path is correct
+import { collection, addDoc } from "firebase/firestore"; 
 
 export default function Add() {
     const [bookName, setBookName] = useState('');
     const [author, setAuthor] = useState('');
     const [price, setPrice] = useState('');
     const [image, setImage] = useState(null);
+    const [contactNumber, setContactNumber] = useState('');  // Contact number state
+
+    const getLocationPermissionAndCoordinates = async () => {
+        let { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== 'granted') {
+            Alert.alert('Permission denied', 'Location permission is required to get your current position.');
+            return;
+        }
+
+        let locationResult = await Location.getCurrentPositionAsync({});
+        const { latitude, longitude } = locationResult.coords;
+
+        return { latitude, longitude }
+    }
 
     const openCamera = async () => {
         const { status } = await ImagePicker.requestCameraPermissionsAsync();
@@ -30,27 +47,33 @@ export default function Add() {
         }
     };
 
-    const handleSave = () => {
-        if (!bookName || !author || !price || !image) {
+    const handleSave = async () => {
+        if (!bookName || !author || !price || !image || !contactNumber) {  // Ensure all fields are filled
             Alert.alert('Please fill all fields and upload an image');
             return;
         }
-        console.log(image)
+
+        const {lat, long} = await getLocationPermissionAndCoordinates();
+
         const newBook = {
             name: bookName,
             author: author,
             price: price,
             image: image,
+            contactNumber: contactNumber,  // Include contact number
+            lat: lat,
+            long: long
         };
 
+        await addDoc(collection(firestore, "books"), newBook);
+
         Alert.alert('Book added successfully', `Name: ${newBook.name}`);
-        //store image somewhere and get the url to store in database
-        //SEND TO DATABASE FROM HERE
 
         setBookName('');
         setAuthor('');
         setPrice('');
         setImage(null);
+        setContactNumber('');  // Reset contact number
     };
 
     return (
@@ -75,6 +98,13 @@ export default function Add() {
                     onChangeText={setPrice}
                     style={styles.input}
                     keyboardType="numeric"
+                />
+                <TextInput
+                    placeholder="Contact Number"  // Contact number placeholder
+                    value={contactNumber}
+                    onChangeText={setContactNumber}
+                    style={styles.input}
+                    keyboardType="phone-pad"  // Phone number specific input type
                 />
                 <TouchableOpacity style={styles.cameraButton} onPress={openCamera}>
                     <MaterialCommunityIcons name="camera" size={24} color="#fff" />

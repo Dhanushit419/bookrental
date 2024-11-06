@@ -1,8 +1,20 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { useNavigation } from '@react-navigation/native';
 import * as Location from 'expo-location';
+import { firestore } from '../firebaseConfig';
+import { collection, addDoc } from "firebase/firestore";
+import { query, where, getDocs } from 'firebase/firestore';
 
+const Tab = createBottomTabNavigator();
+
+// import firestore from "@react-native-firebase/firestore"
+
+// const users = firestore().collection("users")
+const users = collection(firestore, "users")
 export default function Auth() {
+    const navigation = useNavigation();
     const [isRegister, setIsRegister] = useState(true);
     const [name, setName] = useState('');
     const [location, setLocation] = useState('');
@@ -15,9 +27,20 @@ export default function Auth() {
         longitudeRange: [80.2358313919, 80.2362461123],
     };
 
-    const handleRegister = () => {
+    const handleRegister = async () => {
+
+        var user = {
+                name:name,
+                location:location,
+                contact:contact,
+                password: password
+        } 
 
         Alert.alert('Register', `Name: ${name}\nLocation: ${location}\nContact: ${contact}`);
+
+        await addDoc(collection(firestore, "users"), user)
+
+        console.log("user added")
         setName('');
         setLocation('');
         setContact('');
@@ -25,8 +48,29 @@ export default function Auth() {
         //send to database from here
     };
 
-    const handleLogin = () => {
+
+    const checkUserExists = async (contact, password) => {
+        const usersCollection = collection(firestore, 'users');
+        const q = query(usersCollection, 
+                        where('contact', '==', contact), 
+                        where('password', '==', password));
+        
+        const querySnapshot = await getDocs(q);
+        return !querySnapshot.empty;  // Returns true if user exists
+    };
+
+    const handleLogin = async () => {
         Alert.alert('Login', `Contact: ${contact}`);
+
+        var res = await checkUserExists(contact, password)
+
+        if (res) {
+            Alert.alert("Success","Authentication successfull")
+            navigation.navigate('Rent Page') 
+        } else {
+            Alert.alert("Failure", "Invalid Phone number / wrong password")
+        }
+
         setContact('');
         setPassword('');
         //send to database from here
