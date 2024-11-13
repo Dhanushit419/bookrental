@@ -4,10 +4,8 @@ import { getFirestore, collection, getDocs } from "firebase/firestore";
 import Icon from 'react-native-vector-icons/FontAwesome';
 import { firestore } from '../firebaseConfig';
 import Slider from '@react-native-community/slider';
-import Geocoder from 'react-native-geocoding';
 import * as Location from 'expo-location';
-
-Geocoder.init("c8abd4acbd884cd3ab33e9ba8ec4b2b5");
+import axios from 'axios';
 
 var locationName = "Guindy, Chennai";
 
@@ -18,8 +16,36 @@ export default function Rent() {
     const [animationValue] = useState(new Animated.Value(1));
     const [books, setBooks] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [location, setLocation] = useState(null);
+    const [location, setLocation] = useState();
     const [currentLocation, setCurrentLocation] = useState(null);
+
+    const sendPushNotification = async (book) => {
+        const currentDate = new Date().toLocaleString('en-US', { 
+          hour12: true, 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          month: '2-digit', 
+          day: '2-digit', 
+          year: 'numeric'
+        });
+      
+        const data = {
+          appId: 24645,
+          appToken: "4m9C9SVi7j1YfRzk0doa1h",
+          title: `Your wish to buy ${book.name} by ${book.author} is sent to its owner`,
+          body: "Wait for the owner to respond back to you or call to him",
+          dateSent: currentDate,
+          pushData: { yourProperty: "yourPropertyValue" },
+          bigPictureURL: "Big picture URL as a string"
+        };
+      
+        try {
+          const response = await axios.post('https://app.nativenotify.com/api/notification', data);
+          console.log('Notification sent successfully:', response.data);
+        } catch (error) {
+          console.error('Error sending notification:', error);
+        }
+      };
 
     const submitNegotiation = () => {
         if (negotiation) {
@@ -48,31 +74,31 @@ export default function Rent() {
 
     useEffect(() => {
         async function setk() {
-            const boo = await getBooksFromFirestore();
-            setBooks(boo);
-            setLoading(false);
 
             let locationResult = await Location.getCurrentPositionAsync({});
             const { latitude, longitude } = locationResult.coords;
+            
+
+            setCurrentLocation(latitude + " " + longitude + " " + locationName)
+
+
+            console.log("yesss")
 
             setLocation({ latitude, longitude });
-
-            Geocoder.from(latitude, longitude)
-                .then(json => {
-                    const address = json.results[0].formatted_address;
-                    setCurrentLocation(address);
-                })
-                .catch(error => console.warn(error));
+            const boo = await getBooksFromFirestore();
+            setBooks(boo);
+            setLoading(false);
         }
         setk();
     }, []);
 
     const addToCart = (book) => {
+        sendPushNotification(book)
         const finalPrice = book.negotiatedPrice || book.price;
         setCart([...cart, book.id]);
         Alert.alert(
             'Added to Cart',
-            `${book.name} by ${book.author} added to your cart. Owner: ${book.owner} has been informed.`
+            `${book.name} by ${book.author} added to your cart. Owner: ${book.author} has been informed.`
         );
         sendRentDetails(book, finalPrice);
     };
@@ -94,7 +120,7 @@ export default function Rent() {
     const getDistance = (lat1, lon1, lat2, lon2) => {
         const toRad = (value) => (value * Math.PI) / 180;
 
-        const R = 6371; // Radius of the Earth in km
+        const R = 6371; 
         const lat1Rad = toRad(lat1);
         const lon1Rad = toRad(lon1);
         const lat2Rad = toRad(lat2);
@@ -109,7 +135,7 @@ export default function Rent() {
 
         const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-        const distance = R * c; // Distance in km
+        const distance = R * c; 
         return distance;
     };
 
@@ -157,12 +183,6 @@ export default function Rent() {
                             <Icon name="phone" size={30} color="#fff" />
                         </TouchableOpacity>
                     </View>
-                    {/* <TouchableOpacity
-                        style={[styles.negotiateButton, { marginTop: 10 }]}
-                        onPress={() => openNegotiation(item)}
-                    >
-                        <Text style={styles.negotiateButtonText}>Negotiate</Text>
-                    </TouchableOpacity> */}
                 </View>
             </View>
         );
@@ -427,7 +447,7 @@ negotiateButton: {
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    flex: 1,  // To make it aligned with other buttons
+    flex: 1,  
     marginHorizontal: 5,
 },
 

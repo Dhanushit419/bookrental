@@ -8,10 +8,6 @@ import { collection, addDoc } from "firebase/firestore";
 import { query, where, getDocs } from 'firebase/firestore';
 
 const Tab = createBottomTabNavigator();
-
-// import firestore from "@react-native-firebase/firestore"
-
-// const users = firestore().collection("users")
 const users = collection(firestore, "users")
 export default function Auth() {
     const navigation = useNavigation();
@@ -21,7 +17,6 @@ export default function Auth() {
     const [contact, setContact] = useState('');
     const [password, setPassword] = useState('');
 
-    // Define IT department boundaries
     const itDepartmentZone = {
         latitudeRange: [13.0127887755, 13.0130829729],
         longitudeRange: [80.2358313919, 80.2362461123],
@@ -45,7 +40,6 @@ export default function Auth() {
         setLocation('');
         setContact('');
         setPassword('');
-        //send to database from here
     };
 
 
@@ -56,7 +50,7 @@ export default function Auth() {
                         where('password', '==', password));
         
         const querySnapshot = await getDocs(q);
-        return !querySnapshot.empty;  // Returns true if user exists
+        return !querySnapshot.empty;  
     };
 
     const handleLogin = async () => {
@@ -73,8 +67,6 @@ export default function Auth() {
 
         setContact('');
         setPassword('');
-        //send to database from here
-        //navigate after verification
     };
 
     const getLocationPermissionAndCoordinates = async () => {
@@ -87,16 +79,18 @@ export default function Auth() {
         let locationResult = await Location.getCurrentPositionAsync({});
         const { latitude, longitude } = locationResult.coords;
 
-        if (
-            latitude >= itDepartmentZone.latitudeRange[0] &&
-            latitude <= itDepartmentZone.latitudeRange[1] &&
-            longitude >= itDepartmentZone.longitudeRange[0] &&
-            longitude <= itDepartmentZone.longitudeRange[1]
-        ) {
-            setLocation('IT');
-        } else {
-            setLocation('Non IT');
-        }
+        setLocation(latitude + " " + longitude)
+
+        // if (
+        //     latitude >= itDepartmentZone.latitudeRange[0] &&
+        //     latitude <= itDepartmentZone.latitudeRange[1] &&
+        //     longitude >= itDepartmentZone.longitudeRange[0] &&
+        //     longitude <= itDepartmentZone.longitudeRange[1]
+        // ) {
+        //     setLocation('IT');
+        // } else {
+        //     setLocation('Non IT');
+        // }
     };
 
     return (
@@ -250,3 +244,4 @@ const styles = StyleSheet.create({
         fontSize: 16,
     },
 });
+

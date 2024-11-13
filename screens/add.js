@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
-// import firestore from '@react-native-firebase/firestore';
 import { View, Text, TextInput, Image, StyleSheet, Alert, TouchableOpacity } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { firestore } from '../firebaseConfig';  // Make sure the path is correct
+import { firestore } from '../firebaseConfig';  
 import { collection, addDoc } from "firebase/firestore"; 
+import * as Location from 'expo-location';
+
 
 export default function Add() {
     const [bookName, setBookName] = useState('');
     const [author, setAuthor] = useState('');
     const [price, setPrice] = useState('');
     const [image, setImage] = useState(null);
-    const [contactNumber, setContactNumber] = useState('');  // Contact number state
+    const [contactNumber, setContactNumber] = useState(''); 
 
     const getLocationPermissionAndCoordinates = async () => {
         let { status } = await Location.requestForegroundPermissionsAsync();
@@ -48,21 +49,21 @@ export default function Add() {
     };
 
     const handleSave = async () => {
-        if (!bookName || !author || !price || !image || !contactNumber) {  // Ensure all fields are filled
+        if (!bookName || !author || !price || !image || !contactNumber) {  
             Alert.alert('Please fill all fields and upload an image');
             return;
         }
 
-        const {lat, long} = await getLocationPermissionAndCoordinates();
+        const {latitude, longitude} = await getLocationPermissionAndCoordinates();
 
         const newBook = {
             name: bookName,
             author: author,
             price: price,
             image: image,
-            contactNumber: contactNumber,  // Include contact number
-            lat: lat,
-            long: long
+            contactNumber: contactNumber, 
+            lat: latitude,
+            long: longitude
         };
 
         await addDoc(collection(firestore, "books"), newBook);
@@ -73,7 +74,7 @@ export default function Add() {
         setAuthor('');
         setPrice('');
         setImage(null);
-        setContactNumber('');  // Reset contact number
+        setContactNumber('');  
     };
 
     return (
@@ -100,11 +101,11 @@ export default function Add() {
                     keyboardType="numeric"
                 />
                 <TextInput
-                    placeholder="Contact Number"  // Contact number placeholder
+                    placeholder="Contact Number" 
                     value={contactNumber}
                     onChangeText={setContactNumber}
                     style={styles.input}
-                    keyboardType="phone-pad"  // Phone number specific input type
+                    keyboardType="phone-pad"  
                 />
                 <TouchableOpacity style={styles.cameraButton} onPress={openCamera}>
                     <MaterialCommunityIcons name="camera" size={24} color="#fff" />
@@ -128,14 +129,14 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 16,
-        backgroundColor: '#E8F0FE', // Light blue background
+        backgroundColor: '#E8F0FE', 
     },
     title: {
         fontSize: 28,
         fontWeight: 'bold',
         textAlign: 'center',
         marginBottom: 20,
-        color: '#164863', // Dark blue for title
+        color: '#164863', 
     },
     card: {
         backgroundColor: '#FFFFFF',
@@ -148,7 +149,7 @@ const styles = StyleSheet.create({
         elevation: 5,
     },
     input: {
-        backgroundColor: '#F5F5F5', // Soft gray background
+        backgroundColor: '#F5F5F5', 
         padding: 15,
         borderRadius: 10,
         marginBottom: 15,
@@ -158,7 +159,7 @@ const styles = StyleSheet.create({
     },
     cameraButton: {
         flexDirection: 'row',
-        backgroundColor: '#42A5F5', // Bright blue button
+        backgroundColor: '#42A5F5', 
         paddingVertical: 12,
         borderRadius: 10,
         alignItems: 'center',
@@ -180,7 +181,7 @@ const styles = StyleSheet.create({
         borderWidth: 1,
     },
     saveButton: {
-        backgroundColor: '#66BB6A', // Green button
+        backgroundColor: '#66BB6A', 
         paddingVertical: 12,
         borderRadius: 10,
         alignItems: 'center',

@@ -24,6 +24,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "532031e1-14d1-4c10-bbe0-e1488c2d30d8"
+      }
+    },
+    "owner": "yuvaraj787"
   }
 }
